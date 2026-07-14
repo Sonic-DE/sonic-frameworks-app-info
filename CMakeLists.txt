@@ -4,6 +4,8 @@ set(KF_VERSION "6.28.0") # handled by release scripts
 set(KF_DEP_VERSION "6.28.0") # handled by release scripts
 project(KService VERSION ${KF_VERSION})
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Disallow in-source build
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
    message(FATAL_ERROR "KService requires an out of source build. Please create a separate build directory and run 'cmake path_to_kservice [options]' there.")
