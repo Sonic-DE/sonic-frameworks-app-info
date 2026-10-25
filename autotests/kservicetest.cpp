@@ -25,9 +25,11 @@
 #include <kservicegroup.h>
 
 #include <QFile>
+#include <QScopeGuard>
 #include <QScopedValueRollback>
 #include <QSignalSpy>
 #include <QStandardPaths>
+#include <QTemporaryDir>
 #include <QThread>
 
 #include <QDebug>
@@ -178,6 +180,49 @@ void KServiceTest::testConstructorKDesktopFile() // as happens inside kbuildsyco
     const QString filePath = QStandardPaths::locate(QStandardPaths::GenericDataLocation, QStringLiteral("applications/org.kde.faketestapp.desktop"));
     KDesktopFile desktopFile(filePath);
     QCOMPARE(KService(&desktopFile, filePath).name(), QStringLiteral("Konsole"));
+}
+
+void KServiceTest::testSonicDEDesktopVisibility()
+{
+    const QByteArray previous = qgetenv("XDG_CURRENT_DESKTOP");
+    const auto restore = qScopeGuard([previous] {
+        if (previous.isNull()) {
+            qunsetenv("XDG_CURRENT_DESKTOP");
+        } else {
+            qputenv("XDG_CURRENT_DESKTOP", previous);
+        }
+    });
+    qputenv("XDG_CURRENT_DESKTOP", "SonicDE:KDE");
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    struct Case {
+        const char* name;
+        const char* visibility;
+        bool expected;
+    };
+    // Representative entry policies, not assertions about uninstalled packages.
+    const Case cases[] = {
+        {"KCalc", "", true},
+        {"Krita", "", true},
+        {"QGIS", "", true},
+        {"External Emoji Selector", "OnlyShowIn=KDE;\n", true},
+        {"SonicDE Emoji Selector", "OnlyShowIn=SonicDE;\n", true},
+        {"Other desktop helper", "OnlyShowIn=GNOME;\n", false},
+        {"Excluded KDE helper", "NotShowIn=KDE;\n", false},
+        {"Excluded SonicDE helper", "NotShowIn=SonicDE;\n", false},
+    };
+    for (unsigned i = 0; i < std::size(cases); ++i) {
+        const QString path = directory.filePath(QString::number(i) + u".desktop"_s);
+        QFile file(path);
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        const QByteArray contents = QByteArray("[Desktop Entry]\nType=Application\nExec=true\nCategories=Qt;KDE;Utility;\nName=")
+            + cases[i].name + '\n' + cases[i].visibility;
+        QCOMPARE(file.write(contents), contents.size());
+        file.close();
+        KService service(path);
+        QVERIFY(service.isValid());
+        QCOMPARE(service.showInCurrentDesktop(), cases[i].expected);
+    }
 }
 
 void KServiceTest::testCopyConstructor()
