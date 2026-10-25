@@ -26,6 +26,7 @@ private Q_SLOTS:
     void testByName();
     void testConstructorFullPath();
     void testConstructorKDesktopFile();
+    void testSonicDEDesktopVisibility();
     void testCopyConstructor();
     void testCopyInvalidService();
     void testProperty();
