@@ -2,6 +2,10 @@
 
 Sonic Frameworks App Info helps SonicDE find your installed apps and decide which one opens each kind of file.
 
+## Unreleased
+
+- Behind the scenes: a build warning is fixed.
+
 ## 6.31.0.1 (2026-11-10)
 
 - Behind the scenes: added automated checks that apps appear correctly in SonicDE's menus.

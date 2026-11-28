@@ -825,7 +825,10 @@ void KSycoca::setupTestMenu()
     const QString destDir = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation) + QLatin1String("/menus");
     QDir(destDir).mkpath(QStringLiteral("."));
     QFile output(destDir + QLatin1String("/applications.menu"));
-    output.open(QIODevice::ReadWrite | QIODevice::Truncate);
+    if (!output.open(QIODevice::ReadWrite | QIODevice::Truncate)) {
+        qCWarning(SYCOCA) << "Couldn't write" << output.fileName() << output.errorString();
+        return;
+    }
     output.write(content);
 }
 #endif
