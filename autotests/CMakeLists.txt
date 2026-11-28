@@ -30,6 +30,8 @@ if (NOT WIN32)
 
   # KServiceTest::testAllServices can fail if any service is deleted while the test runs
   set_tests_properties(kservicetest PROPERTIES RUN_SERIAL TRUE)
+  # Both rebuild ksycoca from ~/.qttest/share/applications, which kmimeassociationstest also deletes
+  set_tests_properties(kapplicationtradertest PROPERTIES RUN_SERIAL TRUE)
 
   ######### kmimeassociationstest ########
 
@@ -42,4 +44,5 @@ if (NOT WIN32)
 
   ecm_add_test(${kmimeassociationstest_SRCS} TEST_NAME kmimeassociationstest
               LINK_LIBRARIES KF6::Service Qt6::Test Qt6::Xml KF6::ConfigCore KF6::CoreAddons)
+  set_tests_properties(kmimeassociationstest PROPERTIES RUN_SERIAL TRUE)
 endif()
